@@ -1,0 +1,15 @@
+flowchart TB
+  Passenger["Користувач: пасажир"] -->|"HTTPS / JSON"| Mobile["Застосунок: мобільні застосунки пасажира і водія"]
+  Driver["Користувач: водій"] -->|"HTTPS / JSON"| Mobile
+  Operator["Користувач: оператор підтримки"] -->|"HTTPS / JSON"| Support["Застосунок: вебзастосунок підтримки"]
+  Mobile -->|"HTTPS / JSON"| API["Застосунок: API спільних поїздок, ASP.NET Core"]
+  Support -->|"HTTPS / JSON"| API
+  API -->|"gRPC / HTTP2"| Matching["Сервіс: пошук водія"]
+  API -->|"TCP/IP / SQL"| DB[("База даних: PostgreSQL + PostGIS")]
+  API -->|"AMQP"| Queue[("Черга повідомлень: RabbitMQ")]
+  Matching -->|"TCP/IP / SQL"| DB
+  Matching -->|"AMQP"| Queue
+  Queue -->|"AMQP"| Worker["Фоновий процес: надсилання сповіщень"]
+  Worker -->|"HTTPS / JSON"| Notify["Зовнішня система: сервіс сповіщень"]
+  API -->|"HTTPS / JSON"| Maps["Зовнішня система: картографічний сервіс"]
+  API -->|"HTTPS / JSON"| Pay["Зовнішня система: платіжний сервіс"]

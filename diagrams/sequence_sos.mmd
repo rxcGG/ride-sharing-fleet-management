@@ -1,0 +1,21 @@
+sequenceDiagram
+  actor Rider as Пасажир або водій
+  participant App as Мобільний застосунок
+  participant API as API спільних поїздок
+  participant DB as База PostgreSQL
+  participant Queue as Черга RabbitMQ
+  participant Operator as Оператор підтримки
+  Rider->>App: Натиснути SOS під час поїздки
+  App->>API: POST /trips/{tripId}/sos
+  API->>DB: Зберегти повідомлення про подію
+  API->>Queue: Додати сповіщення SOS до черги
+  alt Повідомлення збережено
+    Queue-->>Operator: Повідомити оператора
+    API-->>App: 202, прийнято, номер повідомлення
+  else Поїздка не активна
+    API-->>App: 422, опис помилки
+  end
+  opt Оператор запитує додаткові дані
+    Operator->>API: GET /trips/{tripId}
+    API-->>Operator: Дані поїздки та історія повідомлень
+  end

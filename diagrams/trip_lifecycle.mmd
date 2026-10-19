@@ -1,0 +1,15 @@
+stateDiagram-v2
+  state "Очікує водія" as Requested
+  state "Водія призначено" as Matched
+  state "Поїздка триває" as InProgress
+  state "Завершена" as Completed
+  state "Скасована" as Cancelled
+  [*] --> Requested: пасажир створює замовлення
+  Requested --> Matched: водій приймає замовлення
+  Requested --> Cancelled: пасажир скасовує замовлення
+  Matched --> InProgress: водій починає поїздку
+  Matched --> Cancelled: замовлення можна скасувати
+  InProgress --> Completed: водій завершує поїздку
+  InProgress --> Cancelled: підтримка скасовує після події
+  Completed --> [*]
+  Cancelled --> [*]

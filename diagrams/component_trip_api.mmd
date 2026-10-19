@@ -1,0 +1,7 @@
+flowchart LR
+  Client["Мобільний клієнт"] -->|"Надає: HTTPS / JSON"| Controller["Кінцева точка поїздок"]
+  Controller --> UseCase["Обробник завершення поїздки"]
+  UseCase -->|"Потрібен інтерфейс: ITripRepository"| Repo["Сховище поїздок у пам'яті"]
+  UseCase -->|"Потрібен інтерфейс: ITripNotificationPort"| Notify["Сповіщення в консолі"]
+  Repo -->|"Реалізує ITripRepository"| Port1(("Інтерфейс сховища"))
+  Notify -->|"Реалізує ITripNotificationPort"| Port2(("Інтерфейс сповіщень"))

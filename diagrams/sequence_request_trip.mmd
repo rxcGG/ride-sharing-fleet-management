@@ -1,0 +1,23 @@
+sequenceDiagram
+  actor Passenger as Пасажир
+  participant App as Мобільний застосунок
+  participant API as API спільних поїздок
+  participant Match as Сервіс пошуку водія
+  participant DB as PostgreSQL/PostGIS
+  Passenger->>App: Ввести місце подачі та призначення
+  App->>API: POST /trips
+  API->>DB: Зберегти поїздку зі станом «очікує водія»
+  API->>Match: Знайти водіїв поблизу
+  loop Для кожного відповідного водія
+    Match->>Match: Перевірити відстань і доступність
+  end
+  alt Водія знайдено
+    Match->>DB: Зберегти призначення водія
+    API-->>App: 201, створено, дані поїздки
+  else Водія не знайдено
+    API-->>App: 202, прийнято, пошук триває, tripId
+  end
+  opt Пасажир скасовує замовлення
+    App->>API: DELETE /trips/{tripId}
+    API->>DB: Змінити стан на «скасована»
+  end
