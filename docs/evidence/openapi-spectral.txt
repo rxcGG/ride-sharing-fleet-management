@@ -1,0 +1,5 @@
+OpenAPI lint validation
+Command: Spectral CLI with @stoplight/spectral-rulesets OAS rules
+Input: api/openapi.yaml
+
+No results with a severity of 'error' found!

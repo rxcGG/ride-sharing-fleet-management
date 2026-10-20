@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package rideshare.v1;
+option csharp_namespace = "RideShare.Api";
+
+import "google/protobuf/timestamp.proto";
+
+service TripDispatch {
+  rpc CreateTrip (CreateTripRequest) returns (TripReply);
+  rpc GetTrip (GetTripRequest) returns (TripReply);
+  rpc WatchTripStatus (WatchTripStatusRequest) returns (stream TripStatusUpdate);
+}
+
+enum TripStatus {
+  TRIP_STATUS_UNSPECIFIED = 0;
+  TRIP_STATUS_REQUESTED = 1;
+  TRIP_STATUS_MATCHED = 2;
+  TRIP_STATUS_IN_PROGRESS = 3;
+  TRIP_STATUS_COMPLETED = 4;
+  TRIP_STATUS_CANCELLED = 5;
+}
+
+message CreateTripRequest {
+  message Location {
+    double latitude = 1;
+    double longitude = 2;
+  }
+  string passenger_id = 1;
+  Location pickup = 2;
+  Location dropoff = 3;
+  double fare_estimate = 4;
+}
+
+message GetTripRequest {
+  string trip_id = 1;
+}
+
+message TripReply {
+  string trip_id = 1;
+  string passenger_id = 2;
+  string driver_id = 3;
+  TripStatus status = 4;
+  CreateTripRequest.Location pickup = 5;
+  CreateTripRequest.Location dropoff = 6;
+  double fare_estimate = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message WatchTripStatusRequest {
+  string trip_id = 1;
+}
+
+message TripStatusUpdate {
+  string trip_id = 1;
+  TripStatus status = 2;
+  google.protobuf.Timestamp changed_at = 3;
+}

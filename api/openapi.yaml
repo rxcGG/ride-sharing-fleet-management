@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: Ride Sharing Trips API
+  version: 1.0.0
+  description: Public API for requesting and tracking city trips.
+  contact:
+    name: Ride Sharing project
+servers:
+  - url: http://localhost:4010
+tags:
+  - name: Trips
+    description: Trip requests and status.
+
+paths:
+  /trips:
+    get:
+      summary: List trips
+      operationId: listTrips
+      description: Returns trips matching the requested filters.
+      tags: [Trips]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TripStatus'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Opaque cursor returned by the previous page.
+      responses:
+        '200':
+          description: Trips matching the filters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripPage'
+              example:
+                items:
+                  - id: 58fb68fb-6941-4f2c-9d67-7cb85153ec48
+                    passengerId: 928f4af3-33a8-4d81-9c08-f255540e4fd1
+                    status: REQUESTED
+                    pickup: { latitude: 49.4229, longitude: 26.9871 }
+                    dropoff: { latitude: 49.4384, longitude: 26.9872 }
+                    fareEstimate: 185.5
+                nextCursor: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a trip request
+      operationId: createTrip
+      description: Creates a trip request and accepts driver matching.
+      tags: [Trips]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTripRequest'
+            example:
+              passengerId: 928f4af3-33a8-4d81-9c08-f255540e4fd1
+              pickup: { latitude: 49.4229, longitude: 26.9871 }
+              dropoff: { latitude: 49.4384, longitude: 26.9872 }
+              fareEstimate: 185.5
+      responses:
+        '201':
+          description: Trip request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+              example:
+                id: 58fb68fb-6941-4f2c-9d67-7cb85153ec48
+                passengerId: 928f4af3-33a8-4d81-9c08-f255540e4fd1
+                status: REQUESTED
+                pickup: { latitude: 49.4229, longitude: 26.9871 }
+                dropoff: { latitude: 49.4384, longitude: 26.9872 }
+                fareEstimate: 185.5
+        '202':
+          description: Trip accepted while driver matching continues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /trips/{tripId}:
+    get:
+      summary: Get one trip
+      operationId: getTrip
+      description: Returns one trip.
+      tags: [Trips]
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+      responses:
+        '200':
+          description: Trip details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      summary: Cancel a trip request
+      operationId: cancelTrip
+      description: Cancels a trip request.
+      tags: [Trips]
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+      responses:
+        '204':
+          description: Trip cancelled
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /trips/{tripId}/status:
+    patch:
+      summary: Change a trip status
+      operationId: changeTripStatus
+      description: Changes the status of a trip.
+      tags: [Trips]
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeTripStatusRequest'
+      responses:
+        '200':
+          description: Trip status changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+components:
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    TripStatus:
+      type: string
+      enum: [REQUESTED, MATCHED, IN_PROGRESS, COMPLETED, CANCELLED]
+      example: REQUESTED
+    GeoPoint:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+    CreateTripRequest:
+      type: object
+      required: [passengerId, pickup, dropoff, fareEstimate]
+      properties:
+        passengerId:
+          type: string
+          format: uuid
+        pickup:
+          $ref: '#/components/schemas/GeoPoint'
+        dropoff:
+          $ref: '#/components/schemas/GeoPoint'
+        fareEstimate:
+          type: number
+          format: double
+          minimum: 0.01
+      example:
+        passengerId: 928f4af3-33a8-4d81-9c08-f255540e4fd1
+        pickup: { latitude: 49.4229, longitude: 26.9871 }
+        dropoff: { latitude: 49.4384, longitude: 26.9872 }
+        fareEstimate: 185.5
+    ChangeTripStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/TripStatus'
+    Trip:
+      type: object
+      required: [id, passengerId, status, pickup, dropoff, fareEstimate]
+      properties:
+        id:
+          type: string
+          format: uuid
+        passengerId:
+          type: string
+          format: uuid
+        driverId:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          $ref: '#/components/schemas/TripStatus'
+        pickup:
+          $ref: '#/components/schemas/GeoPoint'
+        dropoff:
+          $ref: '#/components/schemas/GeoPoint'
+        fareEstimate:
+          type: number
+          format: double
+          minimum: 0
+    TripPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+        nextCursor:
+          type: string
+          nullable: true
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+  responses:
+    BadRequest:
+      description: Request is malformed
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example: { type: 'about:blank', title: 'Bad Request', status: 400 }
+    Unauthorized:
+      description: Authentication is required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example: { type: 'about:blank', title: 'Unauthorized', status: 401 }
+    NotFound:
+      description: Trip was not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example: { type: 'about:blank', title: 'Not Found', status: 404 }
+    UnprocessableEntity:
+      description: Request fields do not satisfy validation rules
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example: { type: 'about:blank', title: 'Unprocessable Entity', status: 422 }

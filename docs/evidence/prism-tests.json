@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Коректний запит",
+    "method": "POST",
+    "path": "/trips",
+    "status": 201,
+    "expected": 201,
+    "response": "{\"id\":\"58fb68fb-6941-4f2c-9d67-7cb85153ec48\",\"passengerId\":\"928f4af3-33a8-4d81-9c08-f255540e4fd1\",\"status\":\"REQUESTED\",\"pickup\":{\"latitude\":49.4229,\"longitude\":26.9871},\"dropoff\":{\"latitude\":49.4384,\"longitude\":26.9872},\"fareEstimate\":185.5}"
+  },
+  {
+    "name": "Запит із помилковими даними",
+    "method": "POST",
+    "path": "/trips",
+    "status": 422,
+    "expected": 422,
+    "response": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Entity\",\"status\":422}"
+  },
+  {
+    "name": "Відфільтрований список",
+    "method": "GET",
+    "path": "/trips?status=REQUESTED&limit=5&cursor=next-page",
+    "status": 200,
+    "expected": 200,
+    "response": "{\"items\":[{\"id\":\"58fb68fb-6941-4f2c-9d67-7cb85153ec48\",\"passengerId\":\"928f4af3-33a8-4d81-9c08-f255540e4fd1\",\"status\":\"REQUESTED\",\"pickup\":{\"latitude\":49.4229,\"longitude\":26.9871},\"dropoff\":{\"latitude\":49.4384,\"longitude\":26.9872},\"fareEstimate\":185.5}],\"nextCursor\":null}"
+  }
+]
