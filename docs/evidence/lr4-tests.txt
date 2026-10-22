@@ -1,0 +1,15 @@
+Тестовый запуск для C:\Users\igego\Desktop\univer\Інженерія ПЗ\ЛР1\my-architecture-project\tests\RideShare.Tests\bin\Debug\net10.0\RideShare.Tests.dll (.NETCoreApp,Version=v10.0)
+Общее количество тестовых файлов (1), соответствующих указанному шаблону.
+[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.27]   Discovering: RideShare.Tests
+[xUnit.net 00:00:00.37]   Discovered:  RideShare.Tests
+[xUnit.net 00:00:00.43]   Starting:    RideShare.Tests
+[xUnit.net 00:00:00.56]   Finished:    RideShare.Tests
+  Пройден RideShare.Tests.CompleteTripHandlerTests.HandleAsync_WhenRepositoryFails_PropagatesPortError [29 ms]
+  Пройден RideShare.Tests.CompleteTripHandlerTests.HandleAsync_WhenTripIsNotInProgress_RejectsWithoutSaving [3 ms]
+  Пройден RideShare.Tests.CompleteTripHandlerTests.HandleAsync_WhenTripIsInProgress_SavesAndNotifies [5 ms]
+
+Тестовый запуск выполнен.
+Всего тестов: 3
+     Пройдено: 3
+ Общее время: 1,6849 Секунды
