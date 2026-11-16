@@ -51,7 +51,7 @@ def verify(url, output, fail):
             with urlopen(url + "/health", timeout=2) as health:
                 if json.load(health)["status"] == "ok":
                     break
-        except (URLError, TimeoutError):
+        except (URLError, ConnectionError, TimeoutError):
             time.sleep(0.5)
     else:
         raise RuntimeError("API не відповів.\n" + output())
