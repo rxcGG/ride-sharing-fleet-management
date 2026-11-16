@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Domain\RideShare.Domain.csproj" />
     <ProjectReference Include="..\Application\RideShare.Application.csproj" />
   </ItemGroup>

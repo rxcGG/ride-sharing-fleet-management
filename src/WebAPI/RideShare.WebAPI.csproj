@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../Messaging/RideShare.Messaging.csproj" />
     <ProjectReference Include="..\Domain\RideShare.Domain.csproj" />
     <ProjectReference Include="..\Application\RideShare.Application.csproj" />
     <ProjectReference Include="..\Infrastructure\RideShare.Infrastructure.csproj" />

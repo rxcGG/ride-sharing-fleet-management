@@ -1,23 +1,24 @@
 using RideShare.Application;
 using RideShare.Domain;
+using RideShare.Events;
 
 namespace RideShare.Tests;
 
 public sealed class CompleteTripHandlerTests
 {
     [Fact]
-    public async Task HandleAsync_WhenTripIsInProgress_SavesAndNotifies()
+    public async Task HandleAsync_WhenTripIsInProgress_SavesAndPublishes()
     {
         var trip = CreateInProgressTrip();
         var repository = new FakeTripRepository(trip);
-        var notifications = new FakeTripNotificationPort();
-        var handler = new CompleteTripHandler(repository, notifications);
+        var events = new FakeEventPublisher();
+        var handler = new CompleteTripHandler(repository, events);
 
         var result = await handler.HandleAsync(trip.Id);
 
         Assert.Equal(TripStatus.Completed, result.Status);
         Assert.Equal(1, repository.SaveCount);
-        Assert.Equal(1, notifications.CallCount);
+        Assert.Equal(trip.Id, Assert.IsType<TripCompletedEvent>(Assert.Single(events.Published)).TripId);
     }
 
     [Fact]
@@ -25,7 +26,7 @@ public sealed class CompleteTripHandlerTests
     {
         var trip = Trip.Request(Guid.NewGuid(), new GeoPoint(49.42, 26.98), new GeoPoint(49.43, 26.99), 100m);
         var repository = new FakeTripRepository(trip);
-        var handler = new CompleteTripHandler(repository, new FakeTripNotificationPort());
+        var handler = new CompleteTripHandler(repository, new FakeEventPublisher());
 
         await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(trip.Id));
 
@@ -37,13 +38,13 @@ public sealed class CompleteTripHandlerTests
     {
         var trip = CreateInProgressTrip();
         var repository = new FakeTripRepository(trip) { SaveError = new IOException("Storage port failed.") };
-        var notifications = new FakeTripNotificationPort();
-        var handler = new CompleteTripHandler(repository, notifications);
+        var events = new FakeEventPublisher();
+        var handler = new CompleteTripHandler(repository, events);
 
         var error = await Assert.ThrowsAsync<IOException>(() => handler.HandleAsync(trip.Id));
 
         Assert.Equal("Storage port failed.", error.Message);
-        Assert.Equal(0, notifications.CallCount);
+        Assert.Empty(events.Published);
     }
 
     private static Trip CreateInProgressTrip()
@@ -72,13 +73,9 @@ internal sealed class FakeTripRepository(Trip? trip) : ITripRepository
     }
 }
 
-internal sealed class FakeTripNotificationPort : ITripNotificationPort
+internal sealed class FakeEventPublisher : IEventPublisher
 {
-    public int CallCount { get; private set; }
+    public List<ITripEvent> Published { get; } = [];
 
-    public Task StatusChangedAsync(Trip trip, CancellationToken cancellationToken = default)
-    {
-        CallCount++;
-        return Task.CompletedTask;
-    }
+    public void Publish(ITripEvent tripEvent) => Published.Add(tripEvent);
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using RideShare.Application;
 using RideShare.Domain;
 using RideShare.Infrastructure;
+using RideShare.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +13,18 @@ builder.Services.AddSingleton<ITripNotificationPort, ConsoleTripNotificationPort
 // Use cases are stateless, so create them for each resolution.
 builder.Services.AddTransient<CreateTripHandler>();
 builder.Services.AddTransient<CompleteTripHandler>();
+builder.Services.AddSingleton<TripJournal>();
+builder.Services.AddSingleton<TripEventNotifications>();
+builder.Services.AddSingleton<InMemoryEventBus>();
+builder.Services.AddSingleton<IEventBus>(services => services.GetRequiredService<InMemoryEventBus>());
+builder.Services.AddHostedService(services => services.GetRequiredService<InMemoryEventBus>());
+builder.Services.AddSingleton<IEventPublisher, InMemoryEventPublisher>();
 builder.Services.AddGrpc();
 
 var app = builder.Build();
+var eventBus = app.Services.GetRequiredService<IEventBus>();
+eventBus.Subscribe("Журнал поїздок", app.Services.GetRequiredService<TripJournal>().RecordAsync);
+eventBus.Subscribe("Сповіщення пасажира", app.Services.GetRequiredService<TripEventNotifications>().PrepareAsync);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPost("/trips", async (CreateTripHttpRequest request, CreateTripHandler handler, CancellationToken ct) =>
 {
