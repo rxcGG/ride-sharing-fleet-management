@@ -1,6 +1,6 @@
 # Ride Sharing and Fleet Management
 
-Індивідуальний навчальний проєкт для лабораторних робіт № 1–4 з дисципліни «Проєктування архітектури, специфікація та стандарти інженерії». Обрано варіант 6: сервіс поїздок і керування автопарком.
+Індивідуальний навчальний проєкт для лабораторних робіт № 1–6 з дисципліни «Проєктування архітектури, специфікація та стандарти інженерії». Обрано варіант 6: сервіс поїздок і керування автопарком.
 
 ## Призначення
 
@@ -8,11 +8,14 @@
 
 У цій роботі підготовлено опис системи, вимоги якості, сценарії перевірки, карту архітектурних ракурсів і три початкові записи ADR.
 
-## Лабораторні роботи 2–4
+## Лабораторні роботи 2–6
 
 - ЛР2: C4 та UML-діаграми у `diagrams/`, їхні PNG у `docs/diagrams/`, звіт у `docs/architecture_diagrams_report.md`.
 - ЛР3: REST контракт OpenAPI у `api/openapi.yaml`, gRPC контракт у `api/service.proto`, згенеровані C# стаби у `api/generated/csharp/`. Звіт: `docs/api_specification_report.md`.
 - ЛР4: модульне ядро в `src/Domain`, `src/Application`, `src/Infrastructure`, `src/WebAPI`; модульні тести в `tests/RideShare.Tests`. Звіт: `docs/clean_architecture_report.md`.
+
+- ЛР5: [Події поїздок і перевірка повторної доставки](docs/event_driven_report.md).
+- ЛР6: [Архітектурний опис](Architectural_Design_Document_ADD.md), [діаграма розгортання](docs/diagrams/deployment.png) та [презентація](Architecture_Presentation.pdf).
 
 ## Перевірка
 

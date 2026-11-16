@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam defaultFontName "Arial"
+skinparam shadowing false
+skinparam dpi 140
+
+node "Комп’ютер або CI-вузол" as host <<device>> {
+  artifact "Клієнт перевірки\ntools/verify_events.py" as client <<artifact>>
+  node "Docker Engine" as runtime <<executionEnvironment>> {
+    node "Контейнер backend-api\nASP.NET Core / .NET 10" as container <<executionEnvironment>> {
+      artifact "RideShare.WebAPI.dll" as api <<artifact>>
+      component "Шина Channel" as bus
+      component "Журнал поїздок" as journal
+      component "Сповіщення пасажира" as notify
+      database "Дані поїздок\nу пам’яті" as data
+      api --> bus : виклик у процесі
+      api --> data : виклик у процесі
+      bus --> journal : окрема черга
+      bus --> notify : окрема черга
+    }
+  }
+}
+node "Зовнішній картографічний сервіс" as maps <<device>>
+node "Зовнішній платіжний сервіс" as pay <<device>>
+client --> api : HTTP / JSON · TCP 8080
+client ..> api : gRPC / HTTP/2 · TCP 8081\nпорт для gRPC-клієнта
+api ..> maps : HTTPS · TCP 443\nпередбачено для повної системи
+api ..> pay : HTTPS · TCP 443\nпередбачено для повної системи
+@enduml

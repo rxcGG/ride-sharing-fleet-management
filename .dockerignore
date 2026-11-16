@@ -1,0 +1,8 @@
+**
+!Directory.Packages.props
+!src/
+!src/**
+src/**/bin
+src/**/obj
+!api/
+!api/service.proto

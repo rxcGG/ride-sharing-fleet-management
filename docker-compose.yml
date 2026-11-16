@@ -1,0 +1,15 @@
+services:
+  backend-api:
+    build: .
+    image: rideshare/backend-api:1.0
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8081:8081"
+    environment:
+      Kestrel__Endpoints__Rest__Url: http://0.0.0.0:8080
+      Kestrel__Endpoints__Rest__Protocols: Http1
+      Kestrel__Endpoints__Grpc__Url: http://0.0.0.0:8081
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+      Logging__Console__FormatterOptions__SingleLine: "true"
+      Demo__RepeatEvents: "${DEMO_REPEAT_EVENTS:-false}"
+      Demo__FailNotifications: "${DEMO_FAIL_NOTIFICATIONS:-false}"
